@@ -1,0 +1,118 @@
+.table th, .table td {
+    text-align: center; /* Căn giữa theo chiều ngang */
+    vertical-align: middle; /* Căn giữa theo chiều dọc */
+    padding: 10px; /* Thêm khoảng cách cho nội dung */
+}
+
+.table-group-divider > tr {
+    border-top: 2px solid #dee2e6; /* Thêm đường viền giữa các nhóm */
+}
+
+ul {
+    list-style: none; /* Xóa bullet points trong danh sách vai trò */
+    padding: 0;
+    margin: 0;
+}
+
+td ul li {
+    display: inline-block;
+    padding: 0 5px; /* Thêm khoảng cách giữa các vai trò */
+}
+
+td a {
+    margin: 0 5px; /* Thêm khoảng cách giữa các nút hành động */
+}
+
+/* Đổi màu cho từng icon */
+.bi-pencil-square {
+    color: #007bff; /* Màu xanh dương cho icon chỉnh sửa */
+}
+
+.bi-trash3-fill {
+    color: #dc3545; /* Màu đỏ cho icon xóa */
+}
+
+.bi-eye-fill {
+    color: #28a745; /* Màu xanh lá cho icon xem */
+}
+
+/* Đổi màu khi di chuột qua (hover) */
+td a:hover .bi-pencil-square {
+    color: #0056b3; /* Đậm hơn khi hover */
+}
+
+td a:hover .bi-trash3-fill {
+    color: #c82333; /* Đậm hơn khi hover */
+}
+
+td a:hover .bi-eye-fill {
+    color: #218838; /* Đậm hơn khi hover */
+}
+td {
+    font-family:"Arial";
+    font-weight: initial;
+}
+
+.status-active {
+    color: #0c63e4; /* Màu xanh lá cho trạng thái đã kích hoạt */
+     /* Có thể thêm kiểu chữ đậm nếu muốn */
+}
+
+.status-inactive {
+    color: #ffc107; /* Màu xám cho trạng thái chưa kích hoạt */
+
+}
+
+.status-cancel {
+    color: #bb2d3b; /* Màu xám cho trạng thái chưa kích hoạt */
+
+}
+
+.search {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.search .form-control {
+    margin-right: 10px; /* Tạo khoảng cách giữa các thành phần */
+}
+
+.search .form-inline {
+    display: flex;
+}
+
+.alert {
+    display: none;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+.alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+.alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+.notification {
+    border-radius: 5px;
+    padding: 20px 15px;
+    margin-top: 20px;
+    margin-bottom: 0;
+}
+.success {
+    background-color: #d4edda;
+    color: #155724;
+}
+.error {
+    background-color: #f8d7da;
+    color: #721c24;
+
+}
+
+

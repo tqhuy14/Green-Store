@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head">
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Dashboard - SB Admin</title>
+    <link th:href="@{/css/styles.css}" rel="stylesheet" />
+    <link th:href="@{/css/select.css}" rel="stylesheet" />
+    <script th:src="@{https://use.fontawesome.com/releases/v6.3.0/js/all.js}" crossorigin="anonymous"></script>
+    <script th:src="@{https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js}" crossorigin="anonymous"></script>
+    <script th:src="@{/js/scripts.js}"></script>
+    <link th:href="@{/css/table.css}" rel="stylesheet"/>
+    <link th:href="@{/css/createform.css}" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css}"/>
+
+    <style>
+        /* CSS cho nút khi được chọn */
+        .selected {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .disabled {
+            opacity: 0.5;  /* Làm mờ */
+            pointer-events: none;  /* Ngăn không cho tương tác */
+        }
+    </style>
+
+</head>
+<body class="sb-nav-fixed">
+<header th:replace="layout/header :: header"></head>></header>
+
+<div id="layoutSidenav">
+    <div th:replace="layout/nav :: nav" ></div>
+    <div id="layoutSidenav_content">
+        <main class="mt-0">
+            <div style="width: 98%; margin: 0 auto;" class="shadow border-dark">
+                <h3 style=" margin-top: 10px; background: #198754; text-align: center; color: white; font-family: Serif; line-height: 50px;">TẠO ĐƠN HÀNG MỚI</h3>
+
+                <form th:action="@{'/bills/' + ${billID} + '/edit'}" th:object="${bill}" method="post" class="form-inline mb-4" enctype="multipart/form-data">
+
+                    <div th:if="${info1 == 'success'}" id="notification" class="form-group notification success" style="padding: 15px 15px; position: relative; border: 1px solid darkslategray">
+                        <strong style="color: #1a1e21">Đơn hàng đã được lưu thành công! </strong>
+                        <span style="margin-left: 10px"><a th:href="@{/bills}">Trở về</a></span>
+                        <button type="button" class="btn-close" aria-label="Close" onclick="this.parentElement.style.display='none';" style="position: absolute; top: 15px; right: 10px;"></button>
+                    </div>
+
+                    <div class="row" style="margin: 0">
+                        <div class="col-4" style="padding: 0">
+                            <div class="form-group" style="padding-top: 20px">
+                                <label for="tenKhachHang">Tên khách hàng:</label>
+                                <input type="text" id="tenKhachHang" name="tenKhachHang" class="form-control ml-2" th:value="${bill.tenKhachHang}" required>
+                                <span th:if="${#fields.hasErrors('tenKhachHang')}" th:errors="*{tenKhachHang}" class="text-danger"></span>
+                            </div>
+                            <div class="form-group" style="padding-top: 20px">
+                                <label for="soKhachHang">Số điện thoại:</label>
+                                <input type="text" id="soKhachHang" name="soKhachHang" class="form-control ml-2" th:value="${bill.soKhachHang}" required>
+                                <span th:if="${#fields.hasErrors('soKhachHang')}" th:errors="*{soKhachHang}" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group" style="padding-top: 20px">
+                                <label style="display: block; margin-bottom: 4px;">Chọn sản phẩm:</label>
+                                <div class="custom-select-wrapper">
+                                    <select id="productId" name="productId" class="form-control custom-select-arrow" style="max-height: 150px; overflow-y: auto;" onchange="updatePrice()">
+                                        <option disabled selected> Chọn sản phẩm</option>
+                                        <option th:each="product : ${productDtos}"
+                                                th:value="${product.id}"
+                                                th:text="${product.name}"
+                                                th:data-price="${product.price}"
+                                                th:selected="${product.id == bill.productId}">
+                                        </option>
+                                    </select>
+                                </div>
+                                <span th:if="${#fields.hasErrors('productId')}" th:errors="*{productId}" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-4" style="padding: 0">
+
+                            <div class="form-group" style="padding-top: 20px">
+                                <label for="soLuongMua">Số lượng:</label>
+                                <input type="number" id="soLuongMua" name="soLuongMua" class="form-control ml-2" th:value="${bill.soLuongMua}" required oninput="calculateTotal()">
+                                <span th:if="${#fields.hasErrors('soLuongMua')}" th:errors="*{soLuongMua}" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group" style="padding-top: 20px">
+                                <label for="giaGoc">Giá gốc (đ):</label>
+                                <input type="number" id="giaGoc" name="giaGoc" class="form-control ml-2" th:value="${bill.giaGoc}" readonly>
+                                <span th:if="${#fields.hasErrors('giaGoc')}" th:errors="*{giaGoc}" class="text-danger"></span>
+                            </div>
+
+                            <!-- Image upload field -->
+                            <div class="form-group" style="padding-top: 20px">
+                                <label for="giaSale">Giá bán (đ):</label>
+                                <input type="number" id="giaSale" name="giaSale" class="form-control ml-2" th:value="${bill.giaSale}" readonly>
+                                <span th:if="${#fields.hasErrors('giaSale')}" th:errors="*{giaSale}" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-4" style="padding: 0">
+                            <div class="form-group" style="padding-top: 20px">
+                                <h6 style="margin-left: 5px">KHUYẾN MÃI ÁP DỤNG</h6>
+                                <div style="width: 100%; overflow-y: auto; padding-bottom: 10px;">
+                                    <div style="display: block;">
+                                        <button th:each="event : ${bill.events}"
+                                                th:value="${event.id}"
+                                                th:attr="data-sale=${event.sale}, data-id=${event.id}"
+                                                th:text="${event.name}"
+                                                type="button"
+                                                style="margin: 5px; min-width: 100px;"
+                                                class="btn btn-outline-primary btn-sm event-button"
+                                                onclick="selectSingleEvent(this, this.dataset.id , this.dataset.sale)">
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- Thêm input ẩn để lưu eventId -->
+                                <input type="hidden" id="eventId" name="eventId" value="" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin: 0">
+
+                        <div class="col-4 card1">
+                            <div style="margin-left: 55px; margin-top: 40px">
+                                <label>
+                                    <input type="radio" name="paymentMethod" value="cash" onclick="toggleInputs(this)" required>
+                                    THANH TOÁN TRỰC TIẾP
+                                </label>
+                                <div class="form-group" style="padding-top: 10px; margin: 0">
+                                    <label for="soTienNhanTuKhach">Số tiền khách đưa (đ):</label>
+                                    <input type="number" id="soTienNhanTuKhach" name="soTienNhanTuKhach" class="form-control ml-2" th:value="${bill.soTienNhanTuKhach}" required oninput="updateChange()">
+                                    <span th:if="${#fields.hasErrors('soTienNhanTuKhach')}" th:errors="*{soTienNhanTuKhach}" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group" style="padding-top: 10px; margin: 0">
+                                    <label for="soTienTraLai">Số tiền trả lại (đ):</label>
+                                    <input type="number" id="soTienTraLai" name="soTienTraLai" class="form-control ml-2" th:value="${bill.soTienTraLai}" readonly>
+                                    <span th:if="${#fields.hasErrors('soTienTraLai')}" th:errors="*{soTienTraLai}" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-8">
+                            <div style="margin-left: 55px; margin-top: 40px">
+                                <label>
+                                    <input type="radio" name="paymentMethod" value="delivery" onclick="toggleInputs(this)" required>
+                                    GIAO HÀNG TẬN NƠI
+                                </label>
+                                <div class="form-group" style="padding-top: 10px; margin: 0; width: 730px">
+                                    <label for="address">Địa chỉ nhận hàng:</label>
+                                    <input type="text" id="address" name="address" class="form-control ml-2" th:value="${bill.address}" required>
+                                    <span th:if="${#fields.hasErrors('address')}" th:errors="*{address}" class="text-danger"></span>
+                                </div>
+
+                                <div style="display: flex; justify-content: space-between; width: 730px">
+                                    <div class="form-group" style="padding-top: 10px; margin: 0; width: 200px">
+                                        <label for="tienCoc">Tiền cọc (đ):</label>
+                                        <input type="number" id="tienCoc" name="tienCoc" class="form-control ml-2" th:value="${bill.tienCoc}" required oninput="updateTotal()">
+                                        <span th:if="${#fields.hasErrors('tienCoc')}" th:errors="*{tienCoc}" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="form-group" style="padding-top: 10px; margin: 0; width: 200px">
+                                        <label for="tienShip">Phí ship (đ):</label>
+                                        <input type="number" id="tienShip" name="tienShip" class="form-control ml-2" th:value="${bill.tienShip}" required oninput="updateTotal()">
+                                        <span th:if="${#fields.hasErrors('tienShip')}" th:errors="*{tienShip}" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="form-group" style="padding-top: 10px; margin: 0; width: 200px">
+                                        <label for="tongTienNhanKhiShip">Sẽ thu (đ):</label>
+                                        <input type="number" id="tongTienNhanKhiShip" name="tongTienNhanKhiShip" class="form-control ml-2" th:value="${bill.tongTienNhanKhiShip}" required readonly>
+                                        <span th:if="${#fields.hasErrors('tongTienNhanKhiShip')}" th:errors="*{tongTienNhanKhiShip}" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 30px; margin-top: 35px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <button type="submit" class="btn btn-success shadow" style="margin-right: 20px">Xác nhận</button>
+                            <a class="btn btn-secondary shadow" th:href="@{/bills}" style="margin-left: 20px">Hủy</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </main>
+        <footer th:replace="layout/footer :: footer"></footer>
+    </div>
+</div>
+
+<script>
+    var selectedEventButton = null;  // Variable to store currently selected event button
+    var selectedSale = 0;  // Variable to store current discount percentage
+
+    function selectSingleEvent(button, eventId, sale) {
+        console.log("Selected Sale:", eventId);  // Check the sale value
+        // Cập nhật giá trị eventId vào input ẩn
+        document.getElementById("eventId").value = eventId;
+        // Deselect the button if it's clicked again
+        if (selectedEventButton === button) {
+            button.classList.remove('selected');  // Remove "selected" class from the button
+            selectedEventButton = null;  // Reset the selected button variable
+            selectedSale = 0;  // Reset the discount percentage
+        } else {
+            // Deselect the previously selected button if one exists
+            if (selectedEventButton !== null) {
+                selectedEventButton.classList.remove('selected');
+            }
+            // Select the current button
+            button.classList.add('selected');
+            selectedEventButton = button;  // Update the selected button
+            selectedSale = parseInt(sale);  // Update discount percentage as an integer
+
+
+        }
+
+        // Recalculate total when the event changes
+        calculateTotal();
+    }
+
+    function calculateTotal() {
+        // Get the product value
+        var select = document.getElementById("productId");
+        var selectedOption = select.options[select.selectedIndex];
+        var price = Math.floor(parseFloat(selectedOption.getAttribute("data-price")));  // Round down to the nearest whole number
+
+        // Get the quantity
+        var quantity = parseInt(document.getElementById("soLuongMua").value) || 0;
+
+        // Check if price and quantity are valid numbers
+        if (!isNaN(price) && !isNaN(quantity) && quantity > 0) {
+            // Calculate total base price
+            var total = price * quantity;
+
+            // Update the base price input
+            document.getElementById("giaGoc").value = total;  // Directly use the integer value
+
+            // Check if selectedSale is a valid number
+            if (!isNaN(selectedSale) && selectedSale > 0) {
+                console.log("Applying Discount: ", selectedSale);  // Check discount percentage
+                // Calculate sale price with the discount percentage
+                var salePrice = Math.floor(total * (1 - selectedSale / 100));  // Round down to the nearest whole number
+                document.getElementById("giaSale").value = salePrice;  // Directly use the integer value
+            } else {
+                document.getElementById("giaSale").value = total;  // No discount, show base price
+            }
+        } else {
+            // If no valid values, set base price and sale price to 0
+            document.getElementById("giaGoc").value = 0;
+            document.getElementById("giaSale").value = 0;
+        }
+    }
+
+    function updatePrice() {
+        // Get the product value
+        var select = document.getElementById("productId");
+        var selectedOption = select.options[select.selectedIndex];
+        var price = Math.floor(parseFloat(selectedOption.getAttribute("data-price")));  // Round down to the nearest whole number
+
+        // Get the quantity
+        var quantity = parseInt(document.getElementById("soLuongMua").value) || 0;
+
+        // Check if price and quantity are valid numbers
+        if (!isNaN(price) && !isNaN(quantity) && quantity > 0) {
+            // Calculate total base price
+            var total = price * quantity;
+
+            // Update the base price input
+            document.getElementById("giaGoc").value = total;  // Directly use the integer value
+
+            // Calculate sale price with the discount percentage
+            if (!isNaN(selectedSale) && selectedSale > 0) {
+                var salePrice = Math.floor(total * (1 - selectedSale / 100));  // Round down to the nearest whole number
+                document.getElementById("giaSale").value = salePrice;  // Directly use the integer value
+            } else {
+                document.getElementById("giaSale").value = total;  // No discount, show base price
+            }
+        } else {
+            // If no valid values, set base price and sale price to 0
+            document.getElementById("giaGoc").value = 0;
+            document.getElementById("giaSale").value = 0;
+        }
+    }
+
+    function updateChange() {
+        // Get the amount of money given by the customer
+        var soTienNhanTuKhach = Math.floor(parseFloat(document.getElementById("soTienNhanTuKhach").value)) || 0;
+
+        // Get the sale price
+        var giaBan = Math.floor(parseFloat(document.getElementById("giaSale").value)) || 0;  // Ensure the sale price has been updated
+
+        // Calculate change to return
+        var soTienTraLai = soTienNhanTuKhach - giaBan;
+
+        // Update the return amount input
+        document.getElementById("soTienTraLai").value = soTienTraLai;  // Directly use the integer value
+    }
+
+    function updateTotal() {
+        // Get the deposit and shipping fee values
+        var tienCoc = Math.floor(parseFloat(document.getElementById("tienCoc").value)) || 0;
+        var tienShip = Math.floor(parseFloat(document.getElementById("tienShip").value)) || 0;
+
+        // Get the sale price
+        var giaBan = Math.floor(parseFloat(document.getElementById("giaSale").value)) || 0;  // Ensure the sale price has been updated
+
+        // Calculate total amount to be collected
+        var tongTienNhanKhiShip = giaBan - tienCoc + tienShip;
+
+        // Update the value in the "Sẽ thu" field
+        document.getElementById("tongTienNhanKhiShip").value = tongTienNhanKhiShip;  // Directly use the integer value
+    }
+
+    function toggleInputs(selectedRadio) {
+        // Get all inputs in the "THANH TOÁN TRỰC TIẾP" section
+        const cashInputs = document.querySelectorAll('.card1 .form-group input');
+        // Get all inputs in the "GIAO HÀNG TẬN NƠI" section
+        const deliveryInputs = document.querySelectorAll('.col-8 .form-group input');
+
+        // If the direct payment button is selected
+        if (selectedRadio.value === 'cash') {
+            // Enable inputs for direct payment
+            cashInputs.forEach(input => {
+                input.disabled = false;  // Enable input
+                input.parentElement.style.opacity = 1; // Set opacity
+            });
+
+            // Disable inputs for home delivery
+            deliveryInputs.forEach(input => {
+                input.disabled = true;   // Disable input
+                input.parentElement.style.opacity = 0.5; // Set opacity
+            });
+        } else {
+            // Enable inputs for home delivery
+            deliveryInputs.forEach(input => {
+                input.disabled = false;  // Enable input
+                input.parentElement.style.opacity = 1; // Set opacity
+            });
+
+            // Disable inputs for direct payment
+            cashInputs.forEach(input => {
+                input.disabled = true;   // Disable input
+                input.parentElement.style.opacity = 0.5; // Set opacity
+            });
+        }
+    }
+</script>
+
+</body>
+</html>

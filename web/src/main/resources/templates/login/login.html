@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html
+        xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link th:href="@{/css/login.css}" rel="stylesheet"/>
+    <script th:src="@{https://code.jquery.com/jquery-3.6.0.min.js}"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="login-page ">
+    <h1 style="color: white; text-align: center; font-weight: bold; font-size: 48px; text-shadow: 0 0 10px rgba(0, 255, 0, 0.7); font-family: 'Roboto', sans-serif;">Green Storage</h1>
+    <form th:action="@{/login}" method="post" class="form">
+        <input id="username" name="username" required type="text" placeholder="Tên tài khoản"/>
+        <input type="password" id="password" name="password" required placeholder="Mật khẩu"/>
+        <button type="submit">Đăng nhập</button>
+        <p class="message">Not registered? <a href="#">Create an account</a></p>
+        <p th:if="${param.error}" class="error" style="margin-bottom: 0; color: red">(*) Sai tên đăng nhập hoặc mật khẩu</p>
+    </form>
+
+    <div th:if="${param.logout}" class="alert alert-light mt-4" id="logoutAlert"
+         style="background: white; text-align: center; color: red; height: 30px; border-radius: 5px; font-weight: bold;
+            display: flex; align-items: center; justify-content: center;">
+        Bạn đã đăng xuất!
+    </div>
+</div>
+
+<script>
+    $('.message a').click(function(){
+        $('form').animate({height: "toggle", opacity: "toggle"}, "slow");
+    });
+</script>
+<script>
+    // Tự động ẩn alert sau 5 giây
+    setTimeout(function() {
+        var alert = document.getElementById('logoutAlert');
+        if (alert) {
+            alert.style.display = 'none'; // Ẩn alert
+        }
+    }, 5000); // 5000ms = 5 giây
+</script>
+</body>
+</html>

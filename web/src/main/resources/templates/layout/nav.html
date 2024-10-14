@@ -1,0 +1,71 @@
+<!-- nav.html -->
+<div id="layoutSidenav_nav" th:fragment="nav">
+  <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+    <div class="sb-sidenav-menu">
+      <div class="nav">
+
+        <!-- Quản Lý -->
+        <div th:if="${userFunctions.contains('QLSP') or userFunctions.contains('QLTL') or userFunctions.contains('QLDH') or userFunctions.contains('QLSK')}">
+          <div class="sb-sidenav-menu-heading">Quản Lý</div>
+
+          <!-- Quản lý Kho -->
+          <a class="nav-link collapsed" th:if="${userFunctions.contains('QLSP') or userFunctions.contains('QLTL')}"
+             href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts"
+             aria-expanded="false" aria-controls="collapseLayouts">
+            <div class="sb-nav-link-icon"><i class="bi bi-box2-fill"></i></div>
+            Quản lý Kho
+            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+          </a>
+          <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
+            <nav class="sb-sidenav-menu-nested nav">
+              <a class="nav-link" th:if="${userFunctions.contains('QLSP')}" th:href="@{/products}">Quản Lý Sản Phẩm</a>
+              <a class="nav-link" th:if="${userFunctions.contains('QLTL')}" th:href="@{/types}">Quản Lý Thể Loại</a>
+            </nav>
+          </div>
+
+          <!-- Đơn Hàng -->
+          <a class="nav-link collapsed" th:if="${userFunctions.contains('QLDH') or userFunctions.contains('QLSK')}"
+             href="#" data-bs-toggle="collapse" data-bs-target="#collapsePages"
+             aria-expanded="false" aria-controls="collapsePages">
+            <div class="sb-nav-link-icon"><i class="bi bi-receipt"></i></div>
+            Đơn Hàng
+            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+          </a>
+          <div class="collapse" id="collapsePages" aria-labelledby="headingTwo" data-bs-parent="#sidenavAccordion">
+            <nav class="sb-sidenav-menu-nested nav accordion" id="sidenavAccordionPages">
+              <a class="nav-link" th:if="${userFunctions.contains('QLDH')}" th:href="@{/bills}">Quản lý Đơn</a>
+              <a class="nav-link" th:if="${userFunctions.contains('QLSK')}" th:href="@{/events}">Quản lý Sự Kiện</a>
+            </nav>
+          </div>
+        </div>
+
+        <!-- Nhân Sự -->
+        <div th:if="${userFunctions.contains('QLTK') or userFunctions.contains('QLNQ')}">
+          <div class="sb-sidenav-menu-heading">Nhân Sự</div>
+          <a class="nav-link" th:if="${userFunctions.contains('QLTK')}" th:href="@{/users}">
+            <div class="sb-nav-link-icon"><i class="fa-solid fa-user"></i></div>
+            Quản Lý Tài Khoản
+          </a>
+          <a class="nav-link" th:if="${userFunctions.contains('QLNQ')}" th:href="@{/groups}">
+            <div class="sb-nav-link-icon"><i class="fas fa-lock"></i></div>
+            Quản Lý Phân Quyền
+          </a>
+        </div>
+
+        <!-- Báo cáo -->
+        <div>
+          <div class="sb-sidenav-menu-heading">Báo cáo</div>
+          <a class="nav-link" th:href="@{/chart}">
+            <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+            Thống Kê
+          </a>
+        </div>
+
+      </div>
+    </div>
+    <div class="sb-sidenav-footer">
+      <div class="small">Logged in as:</div>
+      Start Bootstrap
+    </div>
+  </nav>
+</div>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/head :: head"></head>
+<body class="sb-nav-fixed">
+<header th:replace="layout/header :: header"></head>></header>
+
+<div id="layoutSidenav">
+  <div th:replace="layout/nav :: nav" ></div>
+  <div id="layoutSidenav_content" style="background-image: url('img/background.jpg')">
+    <main>
+      <div class="container-fluid px-4" >
+
+        <h1 style="text-align: center; color: #4CAF50; font-weight: bold; font-family: 'Arial Black'; margin: 150px;
+                      text-shadow: 2px 2px 0 #FFFFFF, -2px -2px 0 #FFFFFF, 2px -2px 0 #FFFFFF, -2px 2px 0 #FFFFFF;">
+          Welcome to Green Store
+        </h1>
+          <div style="display: flex; justify-content: center">
+              <!-- Thông báo thành công -->
+              <div th:if="${message}" class="notification alert-success fade-out"
+                   style="border: 1px solid darkslategray; padding: 10px 15px; text-align: center" id="successMessage">
+                  <strong style="color: #1a1e21" th:text="${message}"></strong>
+              </div>
+
+              <!-- Thông báo lỗi -->
+              <div th:if="${errorMessage}" class="notification alert-danger fade-out"
+                   style="border-radius: 5px; width: 500px; background-color: white; border: 3px solid red; padding: 10px 15px; text-align: center"
+                   id="errorMessage">
+                  <strong style="color: #1a1e21" th:text="${errorMessage}"></strong>
+              </div>
+          </div>
+      </div>
+    </main>
+    <footer th:replace="layout/footer :: footer"></footer>
+  </div>
+</div>
+
+<!-- CSS để tạo hiệu ứng mờ dần -->
+<style>
+    .fade-out {
+        transition: opacity 1s ease-in-out;
+    }
+
+    .hidden {
+        opacity: 0;
+    }
+</style>
+
+<!-- Script để ẩn thông báo theo kiểu mờ dần sau 5 giây -->
+<script>
+    window.onload = function() {
+        // Ẩn thông báo thành công theo kiểu mờ dần sau 5 giây
+        const successMessage = document.getElementById('successMessage');
+        if (successMessage) {
+            setTimeout(function() {
+                successMessage.classList.add('hidden');
+            }, 5000); // Sau 5 giây
+        }
+
+        // Ẩn thông báo lỗi theo kiểu mờ dần sau 5 giây
+        const errorMessage = document.getElementById('errorMessage');
+        if (errorMessage) {
+            setTimeout(function() {
+                errorMessage.classList.add('hidden');
+            }, 5000); // Sau 5 giây
+        }
+    }
+</script>
+</body>
+</html>

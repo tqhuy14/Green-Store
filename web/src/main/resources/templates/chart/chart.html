@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/head :: head"></head>
+<body class="sb-nav-fixed">
+<header th:replace="layout/header :: header"></header>
+
+<div id="layoutSidenav">
+    <div th:replace="layout/nav :: nav" th:with="role_current=${role_current}"></div>
+    <div id="layoutSidenav_content">
+        <main>
+            <div class="container-fluid px-4">
+                <h1 class="mt-4">Thống Kê</h1>
+                <ol class="breadcrumb mb-4" style="margin-left: 10px">
+                    <li class="breadcrumb-item"><a th:href="@{/home}">Home</a></li>
+                    <li class="breadcrumb-item active">Dashboard</li>
+                </ol>
+                <div class="row">
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card bg-primary text-white mb-4">
+                            <div class="card-body">Tổng doanh thu tháng <span th:text="${month}"></span></div>
+                            <div class="card-footer d-flex align-items-center justify-content-between">
+                                <h6 class="bill-price" th:text="${totalPrice}"></h6>
+                                <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card bg-warning text-white mb-4">
+                            <div class="card-body">Tổng vốn sản phẩm tháng <span th:text="${month}"></span></div>
+                            <div class="card-footer d-flex align-items-center justify-content-between">
+                                <h6 class="bill-price" th:text="${totalPriceProducts}"></h6>
+                                <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card bg-success text-white mb-4">
+                            <div class="card-body">Tổng đơn hàng tháng <span th:text="${month}"></span></div>
+                            <div class="card-footer d-flex align-items-center justify-content-between">
+                                <h6 th:text="${totalBills + ' bill'}"></h6>
+                                <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card bg-danger text-white mb-4">
+                            <div class="card-body">Tổng đơn bị hủy tháng <span th:text="${month}"></span></div>
+                            <div class="card-footer d-flex align-items-center justify-content-between">
+                                <h6 th:text="${cancelBills} + ' bill'"></h6>
+                                <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xl-6">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <i class="fas fa-chart-area me-1"></i>
+                                Doanh thu năm <span th:text="${year}"></span>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="myAreaChart" width="100%" height="40"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-6">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <i class="fas fa-chart-bar me-1"></i>
+                                Đơn hàng năm <span th:text="${year}"></span>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="myBarChart" width="100%" height="40"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-table me-1"></i>
+                        Doanh thu theo nhân viên
+                    </div>
+                    <div class="card-body">
+                        <table id="datatablesSimple">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tên</th>
+                                <th>Vai trò</th>
+                                <th>Số đơn</th>
+                                <th>Doanh thu</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="entry : ${revenueByEmployee}">
+                                <th scope="row" th:text="${entry[0]}"></th> <!-- ID -->
+                                <td th:text="${entry[1]}"></td> <!-- Tên -->
+                                <td th:text="${entry[2]}"></td> <!-- Vai trò -->
+                                <td th:text="${entry[3]}"></td> <!-- Số đơn -->
+                                <td class="bill-price" th:text="${entry[4]}"></td> <!-- Doanh thu -->
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer th:replace="layout/footer :: footer"></footer>
+    </div>
+</div>
+<script>
+    const priceElements = document.querySelectorAll('.bill-price');
+
+    priceElements.forEach(priceElement => {
+        const priceValue = parseFloat(priceElement.textContent);
+        priceElement.textContent = priceValue.toLocaleString('vi-VN') + '(đ)';
+    });
+</script>
+<script th:src="@{https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js}" crossorigin="anonymous"></script>
+<script th:src="@{js/scripts.js}"></script>
+<script th:src="@{https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js}" crossorigin="anonymous"></script>
+<!-- Biểu đồ doanh thu hàng tháng -->
+<script th:inline="javascript">
+    var months = /*[[${months}]]*/ [];      // Mảng tháng
+    var revenues = /*[[${revenues}]]*/ [];  // Mảng doanh thu
+
+    var ctxArea = document.getElementById("myAreaChart").getContext('2d');
+    var myAreaChart = new Chart(ctxArea, {
+        type: 'line',
+        data: {
+            labels: months,   // Hiển thị tháng
+            datasets: [{
+                label: 'Doanh thu (VND)',
+                data: revenues, // Dữ liệu doanh thu
+                backgroundColor: "rgba(2,117,216,0.2)",
+                borderColor: "rgba(2,117,216,1)",
+                pointRadius: 5,
+                pointBackgroundColor: "rgba(2,117,216,1)",
+                pointBorderColor: "rgba(255,255,255,0.8)",
+                pointHoverRadius: 5,
+                pointHoverBackgroundColor: "rgba(2,117,216,1)",
+                pointHitRadius: 50,
+                pointBorderWidth: 2,
+                tension: 0.4 // Làm đường cong mềm mại
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    ticks: {
+                        maxTicksLimit: 12
+                    }
+                },
+                y: {
+                    ticks: {
+                        min: 0,
+                        maxTicksLimit: 5
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+<!-- Biểu đồ số lượng đơn hàng hàng tháng -->
+<script th:inline="javascript">
+    var orders = /*[[${orders}]]*/ []; // Mảng số lượng đơn hàng
+
+    var ctxBar = document.getElementById("myBarChart").getContext('2d');
+    var myBarChart = new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+            labels: months,   // Hiển thị tháng
+            datasets: [{
+                label: 'Số lượng đơn hàng',
+                data: orders, // Dữ liệu số lượng đơn hàng
+                backgroundColor: "rgba(2,117,216,1)",
+                borderColor: "rgba(2,117,216,1)",
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        maxTicksLimit: 12
+                    }
+                },
+                y: {
+                    ticks: {
+                        min: 0,
+                        maxTicksLimit: 5
+                    },
+                    grid: {
+                        color: "rgba(0, 0, 0, .125)"
+                    }
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>

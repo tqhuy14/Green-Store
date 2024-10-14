@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head">
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Dashboard - SB Admin</title>
+    <link th:href="@{/css/styles.css}" rel="stylesheet" />
+    <script th:src="@{https://use.fontawesome.com/releases/v6.3.0/js/all.js}" crossorigin="anonymous"></script>
+    <script th:src="@{https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js}" crossorigin="anonymous"></script>
+    <script th:src="@{/js/scripts.js}"></script>
+    <link th:href="@{/css/table.css}" rel="stylesheet"/>
+    <link th:href="@{/css/pagination.css}" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css}"/>
+
+</head>
+<body class="sb-nav-fixed">
+<header th:replace="layout/header :: header"></header>
+
+<div id="layoutSidenav">
+    <div th:replace="layout/nav :: nav" ></div>
+    <div id="layoutSidenav_content">
+                <div class="container-fluid px-4" style="height: 555px">
+
+                    <div class="row">
+                        <div class="col-8">
+                            <h2 class="mt-2" style="font-family: Arial">Danh Sách Tài Khoản</h2>
+                            <ol class="breadcrumb mb-4">
+                                <li class="breadcrumb-item"><a th:href="@{/templates/home}">Home</a></li>
+                                <li class="breadcrumb-item active">Nhân Sự</li>
+                            </ol>
+                        </div>
+
+                        <div class="col-4">
+                            <!-- Thông báo thành công -->
+                            <div th:if="${message}" class="notification alert-success" style="border: 1px solid darkslategray; padding: 10px 15px; text-align: center" id="successMessage">
+                                <strong style="color: #1a1e21" th:text="${message}"></strong>
+                            </div>
+
+                            <!-- Thông báo lỗi -->
+                            <div th:if="${errorMessage}" class="notification alert-danger" style="border: 1px solid darkslategray; padding: 10px 15px; text-align: center" id="errorMessage">
+                                <strong style="color: #1a1e21" th:text="${errorMessage}"></strong>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="search mb-2">
+                        <form th:action="@{/users}" method="get" class="form-inline ">
+                            <input style="height: 30px" type="text" name="name" class="form-control mr-2 shadow"
+                                   placeholder="Tìm kiếm theo tên" th:value="${name1}">
+
+                            <select style="height: 30px; padding: 0; text-align: center" name="status" class="form-control mr-2 shadow" onchange="this.form.submit()">
+                                <option value="">-- Tất cả trạng thái --</option>
+                                <option value="active" th:selected="${status == 'active'}">Đã kích hoạt</option>
+                                <option value="inactive" th:selected="${status == 'inactive'}">Chưa kích hoạt</option>
+                            </select>
+
+                            <select style="height: 30px; padding: 0 5px;text-align: center" name="sort" class="form-control mr-2 shadow" onchange="this.form.submit()">
+                                <option value="">-- Không sắp xếp --</option>
+                                <option value="create-asc" th:selected="${sort == 'create-asc'}">Ngày tạo: Cũ tới Mới</option>
+                                <option value="create-desc" th:selected="${sort == 'create-desc'}">Ngày tạo: Mới tới Cũ</option>
+                                <option value="update-asc" th:selected="${sort == 'update-asc'}">Ngày cập nhật: Cũ tới Mới</option>
+                                <option value="update-desc" th:selected="${sort == 'update-desc'}">Ngày cập nhật: Mới tới Cũ</option>
+                            </select>
+
+                            <button style="height: 30px; width: 60px; padding-left: 10px; display: flex; align-items: center; justify-content: center; border:1px" type="submit" class="btn btn-success shadow">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            <a style="margin-left: 5px; height: 30px; width: 60px; padding-left: 10px; display: flex; align-items: center; justify-content: center; border:1px" th:href="@{/users}" class="btn btn-primary shadow">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </a>
+                        </form>
+
+                        <a class="btn btn-info shadow" onclick="openConfirmModal('/users/activate')" style="height: 32px; padding: 2px 5px 0 5px; margin-left: auto; margin-right: 10px">Kích hoạt</a>
+                        <a class="btn btn-warning shadow" onclick="openConfirmModal('/users/inactivate')" style="height: 32px; padding: 2px 5px 0 5px; margin-right: 10px">Tạm ngưng</a>
+                        <a class="btn btn-danger shadow"  onclick="openConfirmModal('/users/delete')" style="height: 32px; padding: 2px 5px 0 5px; margin-right: 10px">Xóa</a>
+                        <a class="btn btn-success shadow" th:href="@{/users/new}" style="height: 32px; padding: 2px 5px 0 5px; margin-right: 10px" >Thêm tài khoản</a>
+                    </div>
+                    <p th:text="${'Tổng '+users.size()+' tài khoản'}" style="font-size: small; color: #5c636a; margin-left: 3px " class="mb-1"></p>
+
+                    <form id="userForm" th:action="@{/users/delete}" method="post">
+                    <div class="mb-4">
+                        <table class="shadow table table-bordered table-striped-columns ">
+                            <thead>
+                            <tr style="background: #198754">
+                                <th scope="col">
+                                    <input type="checkbox" id="selectAll" onclick="toggleSelectAll()">
+                                </th>
+                                <th scope="col">ID</th>
+                                <th scope="col">Họ và tên</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Tên tài khoản</th>
+                                <th scope="col">Vai trò</th>
+                                <th scope="col">Trạng Thái</th>
+                                <th scope="col">Hành Động</th>
+                            </tr>
+
+                            </thead>
+                            <tbody class="table-group-divider">
+                            <tr th:each="user : ${users}">
+                                <td><input type="checkbox" class="rowCheckbox" name="userIds" th:value="${user.id}"></td>
+                                <th scope="row" th:text="${user.id}"></th>
+                                <td th:text="${user.name}"></td>
+                                <td th:text="${user.email}"></td>
+                                <td th:text="${user.username}"></td>
+                                <td th:text="${user.getRole()}"></td>
+                                <td>
+                                    <span th:if="${user.status == 'active'}" class="status-active">Đã kích hoạt</span>
+                                    <span th:if="${user.status == 'inactive'}" class="status-inactive">Chưa kích hoạt</span>
+                                </td>
+
+                                <td>
+                                    <a th:href="@{/users/{userID}/edit(userID=${user.id})}" class="no-underline"><span><i class="bi bi-pencil-square"></i></span></a>
+                                    <a th:href="@{/users/{userID}/delete(userID=${user.id})}"
+                                       onclick="return confirmDelete();" style="text-decoration: none;">
+                                        <span><i class="bi bi-trash3-fill"></i></span>
+                                    </a>
+                                    <a href="#" class="no-underline" th:onclick="'openUserDetailModal(' + ${user.id} + ');'">
+                                    <span><i class="bi bi-eye-fill"></i></span>
+                                    </a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    </form>
+                </div>
+
+        <div class="pagination">
+            <ul style="list-style-type: none; display: flex;">
+                <!-- Previous Button (disabled if on the first page) -->
+                <li th:if="${currentPage > 0}">
+                    <a th:href="@{/users(page=${currentPage - 1}, size=${pageSize}, name=${name1}, status=${status}, sort=${sort})}">Previous</a>
+                </li>
+                <li th:unless="${currentPage > 0}">
+                    <span>Previous</span>
+                </li>
+
+                <!-- First page -->
+                <li th:if="${currentPage > 2}">
+                    <a th:href="@{/users(page=0, size=${pageSize}, name=${name1}, status=${status}, sort=${sort})}">1</a>
+                </li>
+
+                <!-- Ellipsis if there are more than 5 pages before the current page -->
+                <li th:if="${currentPage > 3}">
+                    <span>...</span>
+                </li>
+
+                <!-- Pages near the current page -->
+                <li th:if="${totalPages > 1}">
+                <li th:each="i : ${#numbers.sequence(currentPage - 2 > 0 ? currentPage - 2 : 0 , currentPage + 2 < totalPages - 1 ? currentPage + 2 : totalPages - 1)}"
+                    th:if="${i >= 0}"> <!-- Thêm điều kiện để đảm bảo i không âm -->
+                    <a th:href="@{/users(page=${i}, size=${pageSize}, name=${name1}, status=${status}, sort=${sort})}"
+                       th:classappend="${i == currentPage} ? 'active'"
+                       th:text="${i + 1}"></a>
+                </li>
+                </li>
+
+
+                <!-- Ellipsis if there are more than 5 pages after the current page -->
+                <li th:if="${currentPage < totalPages - 4}">
+                    <span>...</span>
+                </li>
+
+                <!-- Last page -->
+                <li th:if="${currentPage < totalPages - 3}">
+                    <a th:href="@{/users(page=${totalPages - 1}, size=${pageSize}, name=${name1}, status=${status}, sort=${sort})}" th:text="${totalPages}"></a>
+                </li>
+
+                <!-- Next Button (disabled if on the last page) -->
+                <li th:if="${currentPage < totalPages - 1}">
+                    <a th:href="@{/users(page=${currentPage + 1}, size=${pageSize}, name=${name1}, status=${status}, sort=${sort})}">Next</a>
+                </li>
+                <li th:unless="${currentPage < totalPages - 1}">
+                    <span>Next</span>
+                </li>
+            </ul>
+        </div>
+
+
+        <footer th:replace="layout/footer :: footer"></footer>
+    </div>
+</div>
+
+<!-- Modal Hiển Thị Thông Tin Người Dùng -->
+<div class="modal fade" id="userDetailModal" tabindex="-1" aria-labelledby="userDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="userDetailModalLabel">Chi Tiết Người Dùng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="display: flex;justify-content: center; background: #e6dbb9">
+                <img th:src="@{/img/user.jpg}" alt="Ảnh người dùng" style="height: 225px; width: 200px; margin-right: 20px; border-radius: 10px">
+                <div style="margin-left: 10px">
+                    <p style="margin-bottom: 7px"><strong>ID:</strong> <span id="userId"></span></p>
+                    <p style="margin-bottom: 7px"><strong>Họ và Tên:</strong> <span id="userName"></span></p>
+                    <p style="margin-bottom: 7px"><strong>Email:</strong> <span id="userEmail"></span></p>
+                    <p style="margin-bottom: 7px"><strong>Phone:</strong> <span id="phone"></span></p>
+                    <p style="margin-bottom: 7px"><strong>Tên Tài Khoản:</strong> <span id="userUsername"></span></p>
+                    <p style="margin-bottom: 7px"><strong>Vai Trò:</strong> <span id="userRole"></span></p>
+                    <p style="margin-bottom: 7px"><strong>Trạng Thái:</strong> <span id="userStatus"></span></p>
+                </div>
+            </div>
+            <div style="margin-left: 35px; margin-top: 15px">
+                <table>
+                    <tr>
+                        <td><strong>Ngày Tạo:</strong></td>
+                        <td style="padding-left: 20px" id="userCreatedOn"></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ngày Cập Nhật:</strong></td>
+                        <td style="padding-left: 20px" id="userUpdatedOn"></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Xác Nhận -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalLabel">Xác Nhận Hành Động</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Bạn có chắc chắn muốn thực hiện hành động này?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="confirmButton">Xác Nhận</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function confirmDelete() {
+        return confirm("Bạn có chắc chắn muốn xóa người dùng này?");
+    }
+</script>
+
+<script>
+    function openUserDetailModal(userId) {
+        console.log("Fetching details for userId:", userId);
+        fetch(`/users/${userId}/details`)
+            .then(response => response.json())
+            .then(user => {
+                if (user) {
+                    document.getElementById('userId').innerText = user.id;
+                    document.getElementById('userName').innerText = user.name;
+                    document.getElementById('userEmail').innerText = user.email;
+                    document.getElementById('phone').innerText = user.phone;
+                    document.getElementById('userUsername').innerText = user.username;
+                    document.getElementById('userRole').innerText = user.role;
+                    document.getElementById('userStatus').innerText = (user.status === 'active') ? 'Đã kích hoạt' : 'Chưa kích hoạt';
+
+                    // Cập nhật createdOn và updatedOn
+                    document.getElementById('userCreatedOn').innerText = user.createdOn ? new Date(user.createdOn).toLocaleString() : 'Không có thông tin';
+                    document.getElementById('userUpdatedOn').innerText = user.updatedOn ? new Date(user.updatedOn).toLocaleString() : 'Không có thông tin';
+
+                    const userDetailModal = new bootstrap.Modal(document.getElementById('userDetailModal'));
+                    userDetailModal.show();
+                } else {
+                    alert("Không tìm thấy thông tin người dùng.");
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching user details:', error);
+                alert("Đã xảy ra lỗi khi lấy thông tin người dùng.");
+            });
+    }
+
+
+    // Hàm mở modal xác nhận hành động
+    let actionUrl;
+    function openConfirmModal(action) {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"].rowCheckbox');
+        const anyChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
+
+        if (anyChecked) {
+            actionUrl = action; // Lưu đường dẫn action
+            const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+            confirmModal.show(); // Hiển thị modal
+        } else {
+            alert("Vui lòng chọn ít nhất một người dùng để thực hiện hành động.");
+        }
+    }
+
+    // Xử lý sự kiện nút xác nhận trong modal
+    document.getElementById('confirmButton').addEventListener('click', function() {
+        const form = document.getElementById('userForm');
+        form.action = actionUrl; // Thiết lập action cho form
+        form.submit(); // Gửi form
+    });
+
+    // Hàm chọn/bỏ chọn tất cả checkbox
+    function toggleSelectAll() {
+        const selectAllCheckbox = document.getElementById('selectAll');
+        const checkboxes = document.querySelectorAll('input[type="checkbox"].rowCheckbox');
+
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = selectAllCheckbox.checked;
+        });
+    }
+
+    window.addEventListener('DOMContentLoaded', (event) => {
+        // Tắt thông báo thành công sau 5 giây
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+
+        if (successMessage) {
+            setTimeout(() => {
+                successMessage.style.opacity = '0';
+            }, 5000);
+        }
+
+        if (errorMessage) {
+            setTimeout(() => {
+                errorMessage.style.opacity = '0';
+            }, 5000);
+        }
+    });
+</script>
+</body>
+</html>
+

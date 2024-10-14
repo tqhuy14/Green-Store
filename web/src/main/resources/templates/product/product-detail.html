@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head">
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Dashboard - SB Admin</title>
+    <link th:href="@{/css/styles.css}" rel="stylesheet" />
+    <link th:href="@{/css/select.css}" rel="stylesheet" />
+    <script th:src="@{https://use.fontawesome.com/releases/v6.3.0/js/all.js}" crossorigin="anonymous"></script>
+    <script th:src="@{https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js}" crossorigin="anonymous"></script>
+    <script th:src="@{/js/scripts.js}"></script>
+    <link th:href="@{/css/table.css}" rel="stylesheet"/>
+    <link th:href="@{/css/createform.css}" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css}"/>
+</head>
+<body class="sb-nav-fixed">
+<header th:replace="layout/header :: header"></head>></header>
+
+<div id="layoutSidenav">
+    <div th:replace="layout/nav :: nav" ></div>
+    <div id="layoutSidenav_content">
+        <main>
+            <div style="margin: 0 auto;" class="shadow border-dark">
+                <h3 style="background: #198754; text-align: center; color: white; font-family: Serif; line-height: 50px;">CHI TIẾT SẢN PHẨM</h3>
+
+                <div th:if="${successMessage}" class="notification alert-success" role="alert" id="success-alert" style="margin-top: 0px">
+                    <span th:text="${successMessage}"></span>
+                </div>
+
+                <div class="row m-0">
+
+                        <div class="col-3" style="margin-left: 35px; margin-top: 20px">
+                            <div style="margin-bottom: 60px">
+                                <h6 style="margin-left: 3px; margin-bottom: 3px; color: #5c636a">Tên Sản Phẩm</h6>
+                                <p th:text="${product.name}" style="font-weight: bold; margin-bottom: 5px"></p>
+                                <div style="border-bottom: 2px solid gray; width: 90%; margin-top: 5px;"></div>
+                            </div>
+
+                            <div style="margin-bottom: 60px">
+                                <h6 style="margin-left: 3px; margin-bottom: 3px; color: #5c636a">Mã Sản Phẩm</h6>
+                                <p th:text="${product.code}" style="font-weight: bold; margin-bottom: 5px"></p>
+                                <div style="border-bottom: 2px solid gray; width: 90%; margin-top: 5px;"></div>
+                            </div>
+
+                            <div style="margin-bottom: 60px">
+                                <h6 style="margin-left: 3px; margin-bottom: 3px; color: #5c636a">Giá Sản Phẩm (đ)</h6>
+                                <p class="product-price" th:text="${product.price}" style="font-weight: bold; margin-bottom: 5px"></p>
+                                <div style="border-bottom: 2px solid gray; width: 90%; margin-top: 5px;"></div>
+                            </div>
+
+                            <div style="margin-bottom: 60px">
+                                <h6 style="margin-left: 3px; margin-bottom: 3px; color: #5c636a">Loại Sản Phẩm</h6>
+                                <p th:text="${product.productTypeDto.name}" style="font-weight: bold; margin-bottom: 5px"></p>
+                                <div style="border-bottom: 2px solid gray; width: 90%; margin-top: 5px;"></div>
+                            </div>
+
+                            <div style="margin-bottom: 30px">
+                                <h6 style="margin-left: 3px; margin-bottom: 3px; color: #5c636a">Mô tả Sản Phẩm</h6>
+                                <p th:text="${product.description}" style="font-weight: bold; margin-bottom: 5px"></p>
+                                <div style="border-bottom: 2px solid gray; width: 90%; margin-top: 5px;"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-3" style="margin-top: 20px">
+
+                            <div style="margin-bottom: 60px">
+                                <h6 style="margin-left: 3px; margin-bottom: 3px; color: #5c636a">Ngày Nhập Kho</h6>
+                                <p th:text="${#dates.format(product.date, 'yyyy-MM-dd')}" style="font-weight: bold; margin-bottom: 5px"></p>
+                                <div style="border-bottom: 2px solid gray; width: 90%; margin-top: 5px;"></div>
+                            </div>
+
+                            <div style="margin-bottom: 60px">
+                                <h6 style="margin-left: 3px; margin-bottom: 3px; color: #5c636a">Tồng kho hiện tại/ban đầu</h6>
+                                <p th:text="${product.so_luong_hien_tai} + '/' + ${product.so_luong_da_nhap}" style="font-weight: bold; margin-bottom: 5px"></p>
+                                <div style="border-bottom: 2px solid gray; width: 90%; margin-top: 5px;"></div>
+                            </div>
+
+                            <div style="margin-bottom: 60px">
+                                <h6 style="margin-left: 3px; margin-bottom: 3px; color: #5c636a">Giá vốn (đ)</h6>
+                                <p class="product-price" th:text="${product.tong_von_san_pham}" style="font-weight: bold; margin-bottom: 5px"></p>
+                                <div style="border-bottom: 2px solid gray; width: 90%; margin-top: 5px;"></div>
+                            </div>
+
+                            <div style="margin-bottom: 30px">
+                                <img th:src="@{${product.imagePath}}" alt="Product Image" style="width: 220px; height: 190px;">
+                            </div>
+
+                        </div>
+
+                    <div class="col-5" style="margin-left: 20px; margin-top: 20px" >
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th scope="col">Tên KH</th>
+                                <th scope="col">Ngày</th>
+                                <th scope="col">Thu</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <!-- Nếu bills null hoặc rỗng -->
+                            <tr th:if="${#lists.isEmpty(bills)}">
+                                <td colspan="3" style="font-style: italic;">Chưa có hóa đơn nào</td>
+                            </tr>
+
+                            <!-- Nếu có bills -->
+                            <tr th:each="bill : ${bills}" th:unless="${#lists.isEmpty(bills)}">
+                                <td th:text="${bill.tenKhachHang}"></td>
+                                <td th:text="${bill.date}" class="bill-date"></td>
+                                <td  class="product-price" th:text="${bill.giaSale}"></td>
+                            </tr>
+                            </tbody>
+
+                        </table>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; margin-right: 60px; padding-bottom: 20px">
+                    <a class="btn btn-success shadow" th:href="@{/bills/new}" style="margin-right: 20px">Thêm đơn hàng</a>
+                    <a class="btn btn-success shadow" href="#" data-bs-toggle="modal" data-bs-target="#addQuantityModal">Thêm số lượng</a>
+                    <a class="btn btn-secondary shadow" style="margin-left: 20px" th:href="@{/products}">Hủy</a>
+                </div>
+
+            </div>
+        </main>
+        <footer th:replace="layout/footer :: footer"></footer>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="addQuantityModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Thêm Số Lượng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addQuantityForm" th:action="@{/products/addQuantity}" method="post">
+                    <div class="mb-3">
+                        <label for="quantity" class="form-label">Số lượng muốn thêm</label>
+                        <input type="number" class="form-control" id="quantity" name="quantity" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="capital" class="form-label">Giá vốn bỏ ra cho số lượng trên (đ)</label>
+                        <input type="number" class="form-control" id="capital" name="capital" required>
+                    </div>
+                    <input type="hidden" id="productId" name="productId" th:value="${product.id}">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="submit" class="btn btn-success" form="addQuantityForm">Thêm số lượng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    const priceElements = document.querySelectorAll('.product-price');
+
+    priceElements.forEach(priceElement => {
+        const priceValue = parseFloat(priceElement.textContent);
+        priceElement.textContent = priceValue.toLocaleString('vi-VN') + ' đ';
+    });
+
+    window.setTimeout(function() {
+        var alertElement = document.getElementById("success-alert");
+        if (alertElement) {
+            alertElement.style.display = 'none';
+        }
+    }, 2000);
+
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Tháng bắt đầu từ 0
+        const year = date.getFullYear();
+
+        let hours = date.getHours();
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+
+        // Chuyển đổi giờ về định dạng 12 giờ
+        hours = hours % 12;
+        hours = hours ? String(hours).padStart(2, '0') : '12'; // Giờ 0 thành 12
+
+        return `${day}/${month}/${year}, ${hours}:${minutes}:${seconds} ${ampm}`;
+    }
+
+    // Lấy tất cả các ô trong cột ngày
+    const billDateCells = document.querySelectorAll('.bill-date');
+
+    // Định dạng từng ô
+    billDateCells.forEach(cell => {
+        const formattedDate = formatDate(cell.innerText);
+        cell.innerText = formattedDate;
+    });
+
+
+</script>
+</body>
+</html>

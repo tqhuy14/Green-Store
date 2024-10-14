@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head">
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+  <title>Dashboard - SB Admin</title>
+  <link th:href="@{/css/styles.css}" rel="stylesheet" />
+  <script th:src="@{https://use.fontawesome.com/releases/v6.3.0/js/all.js}" crossorigin="anonymous"></script>
+  <script th:src="@{https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js}" crossorigin="anonymous"></script>
+  <script th:src="@{/js/scripts.js}"></script>
+  <link th:href="@{/css/table.css}" rel="stylesheet"/>
+  <link th:href="@{/css/createform.css}" rel="stylesheet"/>
+  <link rel="stylesheet" th:href="@{https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css}"/>
+</head>
+<body class="sb-nav-fixed">
+<header th:replace="layout/header :: header"></header>
+
+<div id="layoutSidenav">
+  <div th:replace="layout/nav :: nav" ></div>
+  <div id="layoutSidenav_content">
+    <main class="mt-4">
+      <div style="width: 70%; margin: 0 auto ;" class="shadow border-dark">
+        <h3 style="background: #198754; text-align: center; color: white; font-family: Serif; line-height: 50px;">Thêm Nhóm Quyền</h3>
+        <form th:action="@{/groups/new}" th:object="${group}" method="post" class="form-inline mb-4">
+
+            <div th:if="${info1 == 'success'}" id="notification" class="form-group notification success" style="padding: 15px 15px; position: relative; border: 1px solid darkslategray">
+                <strong style="color: #1a1e21">Nhóm quyền đã được lưu thành công! </strong>
+                <span style="margin-left: 10px"><a th:href="@{/groups}">Trở về</a></span>
+                <button type="button" class="btn-close" aria-label="Close" onclick="this.parentElement.style.display='none';" style="position: absolute; top: 15px; right: 10px;"></button>
+            </div>
+
+          <div class="row">
+
+              <div class="col-4" >
+                  <div class="form-group" style="margin: 0; padding-left: 15px; width: 90%">
+                      <div style="margin-bottom: 20px">
+                          <label for="name" style="margin-bottom: 11px">(*) Tên Nhóm Quyền:</label>
+                          <input type="text" id="name" name="name" class="form-control ml-2" th:value="${group.name}"  required >
+                          <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger"></span>
+                      </div>
+
+                    <div style="margin-bottom: 40px">
+                        <label for="name" style="margin-bottom: 10px">(*) Mô Tả:</label>
+                        <input type="text" id="description" name="description" class="form-control ml-2" th:value="${group.description}">
+                        <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="text-danger"></span>
+                    </div>
+
+                      <button type="button" class="btn btn-warning shadow" style="margin: 20px 10px" id="selectAllUsersBtn" onclick="toggleAllCheckboxes('user-checkbox', this)">Chọn Tất Cả Thành Viên</button>
+                      <button type="button" class="btn btn-primary shadow" style="margin: 20px 10px" id="selectAllFunctionsBtn" onclick="toggleAllCheckboxes('function-checkbox', this)">Chọn Tất Cả Chức Năng</button>
+
+                  </div>
+              </div>
+
+            <div class="col-4">
+                  <div class="form-group" style="margin: 0 ;width: 90%">
+                    <label style="display: block; margin-bottom: 10px;">(*) Thành viên nhóm :</label>
+                    <div style="max-height: 350px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                      <div th:each="user : ${users}" style="margin-bottom: 5px; display: flex; align-items: center;">
+                        <input type="checkbox"
+                               class="user-checkbox"
+                               name="userIds"
+                               th:id="${user.id}+'u'"
+                               th:value="${user.id}"
+                               th:checked="${group.userIds != null && #lists.contains(group.userIds, user.id)}"/>
+                        <label th:for="${user.id}+'u'" style="margin-left: 5px" th:text="${user.name}"></label>
+                      </div>
+                    </div>
+                  </div>
+            </div>
+
+            <div class="col-4">
+            <div class="form-group" style="margin: 0; width: 93%">
+              <label style="display: block; margin-bottom: 10px;">(*) Chức năng nhóm quyền:</label>
+              <div style="max-height: 350px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                <div th:each="function : ${functions}" style="margin-bottom: 5px; display: flex; align-items: center;">
+                  <input type="checkbox"
+                         class="function-checkbox"
+                         name="functionIds"
+                         th:id="${function.id}+'f'"
+                         th:value="${function.id}"
+                         th:checked="${group.functionIds != null && #lists.contains(group.functionIds, function.id)}"/>
+                  <label th:for="${function.id}+'f'" style="margin-left: 5px" th:text="${function.name}"></label>
+                </div>
+              </div>
+            </div>
+            </div>
+
+          <div class="form-group" style="padding-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 50px">
+            <button type="submit" class="btn btn-success shadow">Lưu</button>
+            <a class="btn btn-secondary shadow" th:href="@{/groups}">Hủy</a>
+          </div>
+          </div>
+        </form>
+      </div>
+    </main>
+    <footer th:replace="layout/footer :: footer"></footer>
+  </div>
+</div>
+
+<script>
+    function toggleAllCheckboxes(className, btn) {
+        // Lấy tất cả các checkbox theo class name
+        const checkboxes = document.querySelectorAll('.' + className);
+        let allChecked = true;
+
+        // Kiểm tra xem tất cả các checkbox đã được chọn hay chưa
+        checkboxes.forEach(function(checkbox) {
+            if (!checkbox.checked) {
+                allChecked = false;
+            }
+        });
+
+        // Nếu tất cả đã được chọn, bỏ chọn tất cả
+        if (allChecked) {
+            checkboxes.forEach(function(checkbox) {
+                checkbox.checked = false;
+            });
+            btn.textContent = btn.id === 'selectAllUsersBtn' ? 'Chọn Tất Cả Thành Viên' : 'Chọn Tất Cả Chức Năng';
+        } else {
+            // Nếu chưa, chọn tất cả
+            checkboxes.forEach(function(checkbox) {
+                checkbox.checked = true;
+            });
+            btn.textContent = btn.id === 'selectAllUsersBtn' ? 'Bỏ Chọn Tất Cả Thành Viên' : 'Bỏ Chọn Tất Cả Chức Năng';
+        }
+    }
+</script>
+</body>
+</html>
