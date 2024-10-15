@@ -139,5 +139,11 @@ public class GroupServiceImpl implements GroupService {
         return groupsPage.map(GroupMapper::toDto);
     }
 
+    @Override
+    public List<GroupDto> findGroupByUserID(Long userId) {
+        List<Group> groups = groupRepository.findGroupByUserID(userId);
+        return groups.stream().map(GroupMapper::toDto).collect(Collectors.toList());
+    }
+
 
 }

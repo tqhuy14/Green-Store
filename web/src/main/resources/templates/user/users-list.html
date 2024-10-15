@@ -28,7 +28,7 @@
                         <div class="col-8">
                             <h2 class="mt-2" style="font-family: Arial">Danh Sách Tài Khoản</h2>
                             <ol class="breadcrumb mb-4">
-                                <li class="breadcrumb-item"><a th:href="@{/templates/home}">Home</a></li>
+                                <li class="breadcrumb-item"><a th:href="@{/home}">Home</a></li>
                                 <li class="breadcrumb-item active">Nhân Sự</li>
                             </ol>
                         </div>
@@ -193,17 +193,27 @@
                 <h5 class="modal-title" id="userDetailModalLabel">Chi Tiết Người Dùng</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" style="display: flex;justify-content: center; background: #e6dbb9">
+            <div class="modal-body" style="display: flex;justify-content: center; background: #e6dbb9; padding-bottom: 0">
                 <img th:src="@{/img/user.jpg}" alt="Ảnh người dùng" style="height: 225px; width: 200px; margin-right: 20px; border-radius: 10px">
                 <div style="margin-left: 10px">
-                    <p style="margin-bottom: 7px"><strong>ID:</strong> <span id="userId"></span></p>
-                    <p style="margin-bottom: 7px"><strong>Họ và Tên:</strong> <span id="userName"></span></p>
-                    <p style="margin-bottom: 7px"><strong>Email:</strong> <span id="userEmail"></span></p>
-                    <p style="margin-bottom: 7px"><strong>Phone:</strong> <span id="phone"></span></p>
-                    <p style="margin-bottom: 7px"><strong>Tên Tài Khoản:</strong> <span id="userUsername"></span></p>
-                    <p style="margin-bottom: 7px"><strong>Vai Trò:</strong> <span id="userRole"></span></p>
-                    <p style="margin-bottom: 7px"><strong>Trạng Thái:</strong> <span id="userStatus"></span></p>
+                    <p style="margin-bottom: 11px"><strong>ID:</strong> <span id="userId"></span></p>
+                    <p style="margin-bottom: 11px"><strong>Họ và Tên:</strong> <span id="userName"></span></p>
+                    <p style="margin-bottom: 11px"><strong>Email:</strong> <span id="userEmail"></span></p>
+                    <p style="margin-bottom: 11px"><strong>Phone:</strong> <span id="phone"></span></p>
+                    <p style="margin-bottom: 11px"><strong>Tên Tài Khoản:</strong> <span id="userUsername"></span></p>
+                    <p style="margin-bottom: 11px"><strong>Vai Trò:</strong> <span id="userRole"></span></p>
+                    <p style="margin-bottom: 11px"><strong>Trạng Thái:</strong> <span id="userStatus"></span></p>
                 </div>
+            </div>
+            <div style="background: #e6dbb9">
+                <!-- New Section: Display Groups of the User -->
+                <div style="margin-left: 255px; margin-bottom: 15px">
+                    <strong>Nhóm của Người Dùng:</strong>
+                    <ul id="userGroups" style="list-style-type: none; padding-left: 0">
+                        <!-- Groups will be inserted here -->
+                    </ul>
+                </div>
+
             </div>
             <div style="margin-left: 35px; margin-top: 15px">
                 <table>
@@ -217,12 +227,14 @@
                     </tr>
                 </table>
             </div>
+
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
             </div>
         </div>
     </div>
 </div>
+
 
 
 <!-- Modal Xác Nhận -->
@@ -265,9 +277,26 @@
                     document.getElementById('userRole').innerText = user.role;
                     document.getElementById('userStatus').innerText = (user.status === 'active') ? 'Đã kích hoạt' : 'Chưa kích hoạt';
 
-                    // Cập nhật createdOn và updatedOn
+                    // Cập nhật createdOn và updatedOnproducttype
                     document.getElementById('userCreatedOn').innerText = user.createdOn ? new Date(user.createdOn).toLocaleString() : 'Không có thông tin';
                     document.getElementById('userUpdatedOn').innerText = user.updatedOn ? new Date(user.updatedOn).toLocaleString() : 'Không có thông tin';
+
+                    // Clear the existing group list
+                    const groupList = document.getElementById('userGroups');
+                    groupList.innerHTML = '';
+
+                    // Add groups to the list
+                    if (user.groups && user.groups.length > 0) {
+                        user.groups.forEach(group => {
+                            const listItem = document.createElement('li');
+                            listItem.innerText = group.name;  // Assuming the GroupDto contains a 'name' field
+                            groupList.appendChild(listItem);
+                        });
+                    } else {
+                        const noGroupItem = document.createElement('li');
+                        noGroupItem.innerText = "Không có nhóm nào";
+                        groupList.appendChild(noGroupItem);
+                    }
 
                     const userDetailModal = new bootstrap.Modal(document.getElementById('userDetailModal'));
                     userDetailModal.show();
@@ -280,6 +309,7 @@
                 alert("Đã xảy ra lỗi khi lấy thông tin người dùng.");
             });
     }
+
 
 
     // Hàm mở modal xác nhận hành động

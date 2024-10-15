@@ -5,6 +5,7 @@ import com.inventory_management.web.dto.ProductDto;
 import com.inventory_management.web.dto.ProductTypeDto;
 import com.inventory_management.web.entity.Product;
 import com.inventory_management.web.entity.ProductType;
+import com.inventory_management.web.security.AuthenticatedUserService;
 import com.inventory_management.web.service.BillService;
 import com.inventory_management.web.service.ProductService;
 import com.inventory_management.web.service.TypeService;
@@ -27,15 +28,17 @@ import java.util.List;
 @Controller
 public class ProductController {
 
-    TypeService typeService;
-    ProductService productService;
-    BillService billService;
+    private TypeService typeService;
+    private ProductService productService;
+    private BillService billService;
+    AuthenticatedUserService authenticatedUserService;
 
     @Autowired
-    public ProductController(TypeService typeService, ProductService productService, BillService billService) {
+    public ProductController(TypeService typeService, ProductService productService, BillService billService, AuthenticatedUserService authenticatedUserService) {
         this.typeService = typeService;
         this.productService = productService;
         this.billService = billService;
+        this.authenticatedUserService = authenticatedUserService;
     }
 
     @GetMapping("/products")
@@ -48,11 +51,10 @@ public class ProductController {
             @RequestParam(value = "sort", required = false) String sort,
             @RequestParam(value = "productTypeId", required = false) Integer productTypeId,
             Model model,
-            @ModelAttribute("userFunctions") List<String> userFunctions,
             RedirectAttributes redirectAttributes) {
 
         // Kiểm tra nếu người dùng không có quyền truy cập chức năng này
-        if (!userFunctions.contains("QLSP")) {
+        if (!authenticatedUserService.hasFunctions("QLSP")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền truy cập trang (Quản Lý Sản Phẩm)!");
             return "redirect:/home";
         }
@@ -127,10 +129,9 @@ public class ProductController {
 
     @GetMapping("/products/new")
     public String createProductFrom(Model model,
-                                    @ModelAttribute("userFunctions") List<String> userFunctions,
                                     RedirectAttributes redirectAttributes) {
 
-        if (!userFunctions.contains("TSP") || !userFunctions.contains("QLSP")) {
+        if (!authenticatedUserService.hasFunctions("TSP", "QLSP")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền thêm sản phẩm!");
             return "redirect:/products";
         }
@@ -173,10 +174,9 @@ public class ProductController {
 
     @GetMapping("/products/{productID}/delete")
     public String deleteProduct(@PathVariable long productID, Model model,
-                                @ModelAttribute("userFunctions") List<String> userFunctions,
                                 RedirectAttributes redirectAttributes) {
 
-        if (!userFunctions.contains("XSP") || !userFunctions.contains("QLSP")) {
+        if (!authenticatedUserService.hasFunctions("XSP", "QLSP")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền xóa sản phẩm!");
             return "redirect:/products";
         }
@@ -192,14 +192,12 @@ public class ProductController {
 
     @PostMapping("/products/delete")
     public String deleteProducts(@RequestParam(value = "productIds", required = false) List<Long> productIds,
-                                 @ModelAttribute("userFunctions") List<String> userFunctions,
                                  RedirectAttributes redirectAttributes) {
 
-        if (!userFunctions.contains("XNSP") || !userFunctions.contains("QLSP")) {
+        if (!authenticatedUserService.hasFunctions("XNSP", "QLSP")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền xóa sản phẩm");
             return "redirect:/products";
         }
-
         System.out.println(productIds+"----------------");
         try {
             for (Long productId : productIds) {
@@ -249,13 +247,13 @@ public class ProductController {
     @GetMapping("/products/{productID}/edit")
     public String showEditForm(@PathVariable("productID") Long producID,
                                Model model,
-                               @ModelAttribute("userFunctions") List<String> userFunctions,
                                RedirectAttributes redirectAttributes) {
 
-        if (!userFunctions.contains("CSSP") || !userFunctions.contains("QLSP")) {
+        if (!authenticatedUserService.hasFunctions("CSSP", "QLSP")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền chỉnh sửa sản phẩm!");
             return "redirect:/products";
         }
+
 
         ProductDto productDto = productService.findById(producID);
         List<ProductType> types = typeService.findAllProductTypes();
@@ -267,13 +265,13 @@ public class ProductController {
 
     @GetMapping("/products/{productId}/details")
     public String getproductDetails(@PathVariable Long productId, Model model,
-                                    @ModelAttribute("userFunctions") List<String> userFunctions,
                                     RedirectAttributes redirectAttributes) {
 
-        if (!userFunctions.contains("CTSP") || !userFunctions.contains("QLSP")) {
+        if (!authenticatedUserService.hasFunctions("CTSP", "QLSP")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền xem chi tiết!");
             return "redirect:/products";
         }
+
         ProductDto product = productService.findById(productId);
         List<BillDto> bills = billService.findBillsByProductId(productId);
         ProductTypeDto productTypeDto = typeService.findById(product.getProductTypeId());
@@ -287,10 +285,9 @@ public class ProductController {
     public String addQuantity(@RequestParam("productId") Long productId,
                               @RequestParam("quantity") int quantity,
                               @RequestParam("capital") Long capital,
-                              @ModelAttribute("userFunctions") List<String> userFunctions,
                               RedirectAttributes redirectAttributes) {
 
-        if (!userFunctions.contains("TSLSP") || !userFunctions.contains("QLSP")) {
+        if (!authenticatedUserService.hasFunctions("TSLSP", "QLSP")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền thêm số lượng sản phẩm!");
             return "redirect:/products";
         }

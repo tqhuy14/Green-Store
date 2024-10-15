@@ -4,6 +4,7 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -37,7 +38,7 @@ public class UserDto {
     private LocalDateTime createdOn;
     private LocalDateTime updatedOn;
 
-
+    private List<GroupDto> groups;
     private String role;
 
     @Override

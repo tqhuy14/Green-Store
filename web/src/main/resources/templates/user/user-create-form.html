@@ -62,7 +62,7 @@
             <div class="form-group">
                 <label for="username">Vai Trò:</label>
                 <input type="text" id="role" name="role" class="form-control ml-2" th:value="${user.role}">
-                <span th:if="${#fields.hasErrors('username')}" th:errors="*{role}" class="text-danger"></span>
+                <span th:if="${#fields.hasErrors('role')}" th:errors="*{role}" class="text-danger"></span>
             </div>
             <div class="form-group" style="padding-bottom: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px">
                 <button type="submit" class="btn btn-success shadow">Lưu</button>

@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface GroupRepository extends JpaRepository<Group, Long> {
         Group findByName(String name);
         Group findFirstByOrderByCreatedOnDesc();
@@ -24,4 +26,10 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
         Page<Group> searchGroup(@Param("name") String name,
                                     @Param("status") String status,
                                     Pageable pageable); // Thêm tham số Pageable
+
+
+        @Query("SELECT g FROM Group g JOIN GroupUser gu ON g.id = gu.groupId WHERE gu.userId = :userId")
+        List<Group> findGroupByUserID(@Param("userId") Long userId);
+
+
 }

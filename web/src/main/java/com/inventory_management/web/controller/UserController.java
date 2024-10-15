@@ -1,6 +1,9 @@
 package com.inventory_management.web.controller;
+import com.inventory_management.web.dto.GroupDto;
 import com.inventory_management.web.dto.UserDto;
 import com.inventory_management.web.entity.UserEntity;
+import com.inventory_management.web.security.AuthenticatedUserService;
+import com.inventory_management.web.service.GroupService;
 import com.inventory_management.web.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,11 +21,15 @@ import java.util.List;
 @Controller
 public class UserController {
 
-    UserService userService;
+    private UserService userService;
+    private GroupService groupService;
+    private AuthenticatedUserService authenticatedUserService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, GroupService groupService,AuthenticatedUserService authenticatedUserService) {
         this.userService = userService;
+        this.groupService = groupService;
+        this.authenticatedUserService = authenticatedUserService;
     }
 
     @GetMapping("/users")
@@ -33,11 +40,10 @@ public class UserController {
             @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "sort", required = false) String sort,
             Model model,
-            @ModelAttribute("userFunctions") List<String> userFunctions,
             RedirectAttributes redirectAttributes) {
 
         // Kiểm tra nếu người dùng không có quyền truy cập chức năng này
-        if (!userFunctions.contains("QLTK")) {
+        if (!authenticatedUserService.hasFunctions("QLTK")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền truy cập trang (Quản Lý Tài Khoản)!");
             return "redirect:/home";
         }
@@ -78,9 +84,9 @@ public class UserController {
 
     @GetMapping("/users/new")
     public String newUser(Model model,
-                          @ModelAttribute("userFunctions") List<String> userFunctions,
                           RedirectAttributes redirectAttributes) {
-        if (!userFunctions.contains("TTK") || !userFunctions.contains("QLTK")) {
+
+        if (!authenticatedUserService.hasFunctions("TTK", "QLTK")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền thêm tài khoản!");
             return "redirect:/users";
         }
@@ -96,9 +102,8 @@ public class UserController {
                              Model model) {
 
         UserEntity existingUsername = userService.findByUsername(user.getUsername());
-        if (existingUsername != null && existingUsername.getUsername() != null && !existingUsername.getUsername().isEmpty()) {
-            result.rejectValue("username", "error.user", "(*) Tên tài khoản đã tồn tại");
-        }
+        if (existingUsername != null && existingUsername.getUsername() != null && !existingUsername.getUsername().isEmpty())  result.rejectValue("username", "error.user", "(*) Tên tài khoản đã tồn tại");
+        if ("admin".equals(user.getRole())) result.rejectValue("role", "error.user", "(*) Không thể sử dụng vai trò của admin");
 
         if (result.hasErrors()) {
             model.addAttribute("user", user);
@@ -115,10 +120,9 @@ public class UserController {
 
     @GetMapping("/users/{userID}/delete")
     public String deleteUser(@PathVariable long userID,
-                             @ModelAttribute("userFunctions") List<String> userFunctions,
                              RedirectAttributes redirectAttributes) {
 
-        if (!userFunctions.contains("XTK") || !userFunctions.contains("QLTK")) {
+        if (!authenticatedUserService.hasFunctions("XTK", "QLTK")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền xóa tài khoản!");
             return "redirect:/users";
         }
@@ -165,10 +169,9 @@ public class UserController {
     @GetMapping("/users/{userID}/edit")
     public String showEditForm(@PathVariable("userID") Long userID,
                                Model model,
-                               @ModelAttribute("userFunctions") List<String> userFunctions,
                                RedirectAttributes redirectAttributes) {
 
-        if (!userFunctions.contains("CSTK") || !userFunctions.contains("QLTK")) {
+        if (!authenticatedUserService.hasFunctions("CSTK", "QLTK")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền chỉnh sửa tài khoản!");
             return "redirect:/users";
         }
@@ -181,14 +184,12 @@ public class UserController {
 
     @PostMapping("/users/inactivate")
     public String inactivateUserAccount(@RequestParam(value = "userIds", required = false) List<Long> userIds,
-                                        @ModelAttribute("userFunctions") List<String> userFunctions,
                                         RedirectAttributes redirectAttributes){
 
-        if (!userFunctions.contains("VHTK") || !userFunctions.contains("QLTK")) {
+        if (!authenticatedUserService.hasFunctions("VHTK", "QLTK")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền vô hiệu hóa!");
             return "redirect:/users";
         }
-
         try {
             for (Long userId : userIds) {
                 UserDto userDto = userService.findByID(userId);
@@ -205,10 +206,9 @@ public class UserController {
 
     @PostMapping("/users/activate")
     public String activateUserAccount(@RequestParam(value = "userIds", required = false) List<Long> userIds,
-                                      @ModelAttribute("userFunctions") List<String> userFunctions,
                                       RedirectAttributes redirectAttributes){
 
-        if (!userFunctions.contains("KHTK") || !userFunctions.contains("QLTK")) {
+        if (!authenticatedUserService.hasFunctions("KHTK", "QLTK")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền kích hoạt tài khoản!");
             return "redirect:/users";
         }
@@ -230,7 +230,8 @@ public class UserController {
     public String deleteUserAccount(@RequestParam(value = "userIds", required = false) List<Long> userIds,
                                     @ModelAttribute("userFunctions") List<String> userFunctions,
                                     RedirectAttributes redirectAttributes){
-        if (!userFunctions.contains("XNTK") || !userFunctions.contains("QLTK")) {
+
+        if (!authenticatedUserService.hasFunctions("XNTK", "QLTK")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền xóa tài khoản");
             return "redirect:/users";
         }
@@ -250,6 +251,8 @@ public class UserController {
     @ResponseBody
     public UserDto getUserDetails(@PathVariable Long userId) {
         UserDto user = userService.findByID(userId);
+        List<GroupDto> groups = groupService.findGroupByUserID(userId);
+        user.setGroups(groups);
         return user;
     }
 

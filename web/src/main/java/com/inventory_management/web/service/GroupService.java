@@ -30,4 +30,6 @@ public interface GroupService {
     void updateStatusGroup(Long groupIds, String status);
 
     Page<GroupDto> searchGroups(String name, String status, Pageable pageable);
+
+    List<GroupDto> findGroupByUserID(Long userId);
 }

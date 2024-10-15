@@ -54,5 +54,4 @@ public interface BillRepository extends JpaRepository<Bill, Long> {
             "GROUP BY u.id, u.name, u.role")
     List<Object[]> getRevenueByEmployee(@Param("year") int year);
 
-
 }

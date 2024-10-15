@@ -5,7 +5,8 @@
 <header th:replace="layout/header :: header"></header>
 
 <div id="layoutSidenav">
-    <div th:replace="layout/nav :: nav" th:with="role_current=${role_current}"></div>
+    <div th:replace="layout/nav :: nav"></div>
+
     <div id="layoutSidenav_content">
         <main>
             <div class="container-fluid px-4">

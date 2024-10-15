@@ -31,7 +31,7 @@
 
 </head>
 <body class="sb-nav-fixed">
-<header th:replace="layout/header :: header"></head>></header>
+<header th:replace="layout/header :: header"></header>
 
 <div id="layoutSidenav">
     <div th:replace="layout/nav :: nav" ></div>
@@ -64,7 +64,7 @@
                             <div class="form-group" style="padding-top: 20px">
                                 <label style="display: block; margin-bottom: 4px;">Chọn sản phẩm:</label>
                                 <div class="custom-select-wrapper">
-                                    <select id="productId" name="productId" class="form-control custom-select-arrow" style="max-height: 150px; overflow-y: auto;" onchange="updatePrice()">
+                                    <select readonly id="productId" name="productId" class="form-control custom-select-arrow" style="max-height: 150px; overflow-y: auto;" onchange="updatePrice()">
                                         <option disabled selected> Chọn sản phẩm</option>
                                         <option th:each="product : ${productDtos}"
                                                 th:value="${product.id}"

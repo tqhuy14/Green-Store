@@ -3,6 +3,7 @@ package com.inventory_management.web.controller;
 import com.inventory_management.web.dto.ProductTypeDto;
 import com.inventory_management.web.dto.UserDto;
 import com.inventory_management.web.entity.ProductType;
+import com.inventory_management.web.security.AuthenticatedUserService;
 import com.inventory_management.web.service.ProductService;
 import com.inventory_management.web.service.TypeService;
 import jakarta.validation.Valid;
@@ -21,12 +22,15 @@ import java.util.List;
 @Controller
 public class ProductTypeController {
 
-    TypeService typeService;
-    ProductService productService;
+    private TypeService typeService;
+    private ProductService productService;
+    private AuthenticatedUserService authenticatedUserService;
+
     @Autowired
-    public ProductTypeController(TypeService typeService, ProductService productService) {
+    public ProductTypeController(TypeService typeService, ProductService productService, AuthenticatedUserService authenticatedUserService) {
         this.typeService = typeService;
         this.productService = productService;
+        this.authenticatedUserService = authenticatedUserService;
     }
 
     @GetMapping("/types")
@@ -36,14 +40,14 @@ public class ProductTypeController {
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "sort", required = false) String sort,
             Model model,
-            @ModelAttribute("userFunctions") List<String> userFunctions,
             RedirectAttributes redirectAttributes) {
 
         // Kiểm tra nếu người dùng không có quyền truy cập chức năng này
-        if (!userFunctions.contains("QLTL")) {
+        if (!authenticatedUserService.hasFunctions("QLTL")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền truy cập trang (Quản Lý Thể Loại)!");
             return "redirect:/home";
         }
+
         // Đặt giá trị mặc định cho các trường tìm kiếm nếu chúng là null
         name = (name == null) ? "" : name;
 
@@ -79,10 +83,9 @@ public class ProductTypeController {
 
     @GetMapping("/types/new")
     public String createTypesFrom(Model model,
-                                  @ModelAttribute("userFunctions") List<String> userFunctions,
                                   RedirectAttributes redirectAttributes) {
 
-        if (!userFunctions.contains("TTL") || !userFunctions.contains("QLTL")) {
+        if (!authenticatedUserService.hasFunctions("TTL", "QLTL")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền thêm thể loại!");
             return "redirect:/types";
         }
@@ -120,13 +123,9 @@ public class ProductTypeController {
 
     @GetMapping("/types/{typeID}/delete")
     public String deleteType(@PathVariable long typeID, Model model,
-                             @ModelAttribute("userFunctions") List<String> userFunctions,
                              RedirectAttributes redirectAttributes) {
 
-        if (!userFunctions.contains("XTL") || !userFunctions.contains("QLTL")) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền xóa thể loại!");
-            return "redirect:/types";
-        }
+
 
         try {
         boolean key = typeService.delete(typeID);
@@ -150,11 +149,10 @@ public class ProductTypeController {
                              @ModelAttribute("userFunctions") List<String> userFunctions,
                              RedirectAttributes redirectAttributes) {
 
-        if (!userFunctions.contains("XNTL") || !userFunctions.contains("QLTL")) {
+        if (!authenticatedUserService.hasFunctions("XNTL", "QLTL")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền xóa thể loại");
             return "redirect:/types";
         }
-
         try {
             for (Long typeId : typeIds) {
                 boolean key = typeService.delete(typeId);
@@ -206,7 +204,7 @@ public class ProductTypeController {
                                @ModelAttribute("userFunctions") List<String> userFunctions,
                                RedirectAttributes redirectAttributes) {
 
-        if (!userFunctions.contains("CSTL") || !userFunctions.contains("QLTL")) {
+        if (!authenticatedUserService.hasFunctions("CSTL", "QLTL")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền chỉnh sửa thể loại!");
             return "redirect:/types";
         }
