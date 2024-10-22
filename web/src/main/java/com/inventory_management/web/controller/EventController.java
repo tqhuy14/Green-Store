@@ -3,6 +3,7 @@ package com.inventory_management.web.controller;
 import com.inventory_management.web.dto.EventDto;
 import com.inventory_management.web.dto.ProductTypeDto;
 import com.inventory_management.web.entity.Event;
+import com.inventory_management.web.security.AuthenticatedUserService;
 import com.inventory_management.web.service.EventService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +23,12 @@ import java.util.List;
 public class EventController {
 
     EventService eventService;
+    AuthenticatedUserService authenticatedUserService;
 
     @Autowired
-    public EventController(EventService eventService) {
+    public EventController(EventService eventService, AuthenticatedUserService authenticatedUserService) {
         this.eventService = eventService;
+        this.authenticatedUserService = authenticatedUserService;
     }
 
     @GetMapping("/events")
@@ -39,7 +42,7 @@ public class EventController {
             RedirectAttributes redirectAttributes) {
 
         // Kiểm tra nếu người dùng không có quyền truy cập chức năng này
-        if (!userFunctions.contains("QLSK")) {
+        if (!authenticatedUserService.hasFunctions("QLSK")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền truy cập trang (Quản Lý Sự Kiện)!");
             return "redirect:/home";
         }
@@ -77,7 +80,7 @@ public class EventController {
                                   @ModelAttribute("userFunctions") List<String> userFunctions,
                                   RedirectAttributes redirectAttributes) {
 
-        if (!userFunctions.contains("TSK") || !userFunctions.contains("QLSK")) {
+        if (!authenticatedUserService.hasFunctions("TSK", "QLSK")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền thêm sự kiện");
             return "redirect:/events";
         }
@@ -109,7 +112,7 @@ public class EventController {
                              @ModelAttribute("userFunctions") List<String> userFunctions,
                              RedirectAttributes redirectAttributes) {
 
-        if (!userFunctions.contains("XSK") || !userFunctions.contains("QLSK")) {
+        if (!authenticatedUserService.hasFunctions("XSK", "QLSK")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền xóa sự kiện!");
             return "redirect:/events";
         }
@@ -130,7 +133,7 @@ public class EventController {
                              @ModelAttribute("userFunctions") List<String> userFunctions,
                              RedirectAttributes redirectAttributes) {
 
-        if (!userFunctions.contains("XNSK") || !userFunctions.contains("QLSK")) {
+        if (!authenticatedUserService.hasFunctions("XNSK", "QLSK")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền xóa sự kiện");
             return "redirect:/events";
         }
@@ -174,7 +177,7 @@ public class EventController {
                                @ModelAttribute("userFunctions") List<String> userFunctions,
                                RedirectAttributes redirectAttributes) {
 
-        if (!userFunctions.contains("CSSK") || !userFunctions.contains("QLSK")) {
+        if (!authenticatedUserService.hasFunctions("CSSK", "QLSK")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền chỉnh sửa sự kiện!");
             return "redirect:/events";
         }

@@ -4,6 +4,7 @@ import com.inventory_management.web.dto.FunctionDto;
 import com.inventory_management.web.dto.GroupDto;
 import com.inventory_management.web.dto.UserDto;
 import com.inventory_management.web.entity.Group;
+import com.inventory_management.web.security.AuthenticatedUserService;
 import com.inventory_management.web.service.*;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,14 +27,18 @@ public class GroupController {
     FunctionService functionService;
     GroupUserService groupUserService;
     GroupFunctionService groupFunctionService;
+    AuthenticatedUserService authenticatedUserService;
 
     @Autowired
-    public GroupController(GroupService groupService, UserService userService, FunctionService functionService, GroupUserService groupUserService, GroupFunctionService groupFunctionService) {
+    public GroupController(GroupService groupService, UserService userService,
+                           FunctionService functionService, GroupUserService groupUserService,
+                           GroupFunctionService groupFunctionService, AuthenticatedUserService authenticatedUserService) {
         this.groupService = groupService;
         this.userService = userService;
         this.functionService = functionService;
         this.groupUserService = groupUserService;
         this.groupFunctionService = groupFunctionService;
+        this.authenticatedUserService = authenticatedUserService;
     }
 
     @GetMapping("/groups")
@@ -48,7 +53,7 @@ public class GroupController {
             RedirectAttributes redirectAttributes) {
 
         // Kiểm tra nếu người dùng không có quyền truy cập chức năng này
-        if (!userFunctions.contains("QLNQ")) {
+        if (!authenticatedUserService.hasFunctions("QLNQ")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền truy cập trang (Quản Lý Phân Quyền)!");
             return "redirect:/home";
         }
@@ -92,7 +97,7 @@ public class GroupController {
                            @ModelAttribute("userFunctions") List<String> userFunctions,
                            RedirectAttributes redirectAttributes) {
 
-        if (!userFunctions.contains("TNQ") || !userFunctions.contains("QLNQ")) {
+        if (!authenticatedUserService.hasFunctions("TNQ", "QLNQ")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền thêm nhóm!");
             return "redirect:/groups";
         }
@@ -142,7 +147,7 @@ public class GroupController {
                                RedirectAttributes redirectAttributes,
                                Model model) {
 
-        if (!userFunctions.contains("CSNQ") || !userFunctions.contains("QLNQ")) {
+        if (!authenticatedUserService.hasFunctions("CSNQ", "QLNQ")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền chỉnh sửa nhóm!");
             return "redirect:/groups";
         }
@@ -200,7 +205,7 @@ public class GroupController {
                               @ModelAttribute("userFunctions") List<String> userFunctions,
                               RedirectAttributes redirectAttributes) {
 
-        if (!userFunctions.contains("XNQ") || !userFunctions.contains("QLNQ")) {
+        if (!authenticatedUserService.hasFunctions("XNQ", "QLNQ")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền xóa nhóm!");
             return "redirect:/groups";
         }
@@ -222,7 +227,7 @@ public class GroupController {
                                    @ModelAttribute("userFunctions") List<String> userFunctions,
                                    RedirectAttributes redirectAttributes){
 
-        if (!userFunctions.contains("VHNQ") || !userFunctions.contains("QLNQ")) {
+        if (!authenticatedUserService.hasFunctions("VHNQ", "QLNQ")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền vô hiệu hóa nhóm!");
             return "redirect:/groups";
         }
@@ -244,7 +249,7 @@ public class GroupController {
                                  @ModelAttribute("userFunctions") List<String> userFunctions,
                                  RedirectAttributes redirectAttributes){
 
-        if (!userFunctions.contains("KHNQ") || !userFunctions.contains("QLNQ")) {
+        if (!authenticatedUserService.hasFunctions("KHNQ", "QLNQ")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền kích hoạt nhóm!");
             return "redirect:/groups";
         }
@@ -266,7 +271,7 @@ public class GroupController {
                                @ModelAttribute("userFunctions") List<String> userFunctions,
                                RedirectAttributes redirectAttributes){
 
-        if (!userFunctions.contains("XNNQ") || !userFunctions.contains("QLNQ")) {
+        if (!authenticatedUserService.hasFunctions("XNNQ", "QLNQ")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền xóa nhóm!");
             return "redirect:/groups";
         }

@@ -2,6 +2,7 @@ package com.inventory_management.web.controller;
 
 import com.inventory_management.web.dto.*;
 import com.inventory_management.web.entity.UserEntity;
+import com.inventory_management.web.security.AuthenticatedUserService;
 import com.inventory_management.web.service.BillService;
 import com.inventory_management.web.service.EventService;
 import com.inventory_management.web.service.ProductService;
@@ -27,13 +28,15 @@ public class BillController {
     ProductService productService;
     EventService eventService;
     UserService userService;
+    AuthenticatedUserService authenticatedUserService;
 
     @Autowired
-    public BillController(BillService billService, ProductService productService, EventService eventService, UserService userService) {
+    public BillController(BillService billService, ProductService productService, EventService eventService, UserService userService, AuthenticatedUserService authenticatedUserService) {
         this.billService = billService;
         this.productService = productService;
         this.eventService = eventService;
         this.userService = userService;
+        this.authenticatedUserService = authenticatedUserService;
 
     }
 
@@ -49,7 +52,7 @@ public class BillController {
             RedirectAttributes redirectAttributes) {
 
         // Kiểm tra nếu người dùng không có quyền truy cập chức năng này
-        if (!userFunctions.contains("QLDH")) {
+        if (!authenticatedUserService.hasFunctions("QLDH")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền truy cập trang (Quản Lý Đơn Hàng)!");
             return "redirect:/home";
         }
@@ -95,7 +98,7 @@ public class BillController {
                                   @ModelAttribute("userFunctions") List<String> userFunctions,
                                   RedirectAttributes redirectAttributes) {
 
-        if (!userFunctions.contains("TDH") || !userFunctions.contains("QLDH")) {
+        if (!authenticatedUserService.hasFunctions("TDH", "QLDH")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền thêm đơn hàng");
             return "redirect:/bills";
         }
@@ -136,7 +139,7 @@ public class BillController {
                              @ModelAttribute("userFunctions") List<String> userFunctions,
                              RedirectAttributes redirectAttributes) {
 
-        if (!userFunctions.contains("XDH") || !userFunctions.contains("QLDH")) {
+        if (!authenticatedUserService.hasFunctions("XDH", "QLDH")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền xóa đơn hàng!");
             return "redirect:/bills";
         }
@@ -157,8 +160,8 @@ public class BillController {
                              @ModelAttribute("userFunctions") List<String> userFunctions,
                              RedirectAttributes redirectAttributes) {
 
-        if (!userFunctions.contains("XNDH") || !userFunctions.contains("QLDH")) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền xóa đơn hàng");
+        if (!authenticatedUserService.hasFunctions("XNDH", "QLDH")) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền xóa đơn hàng!");
             return "redirect:/bills";
         }
 
@@ -196,7 +199,7 @@ public class BillController {
                                @ModelAttribute("userFunctions") List<String> userFunctions,
                                RedirectAttributes redirectAttributes) {
 
-        if (!userFunctions.contains("CSDH") || !userFunctions.contains("QLDH")) {
+        if (!authenticatedUserService.hasFunctions("CSDH", "QLDH")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền chỉnh sửa đơn hàng!");
             return "redirect:/bills";
         }
@@ -234,7 +237,7 @@ public class BillController {
                                         @ModelAttribute("userFunctions") List<String> userFunctions,
                                         RedirectAttributes redirectAttributes){
 
-        if (!userFunctions.contains("HTDH") || !userFunctions.contains("QLDH")) {
+        if (!authenticatedUserService.hasFunctions("HTDH", "QLDH")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền hoàn thành đơn hàng!");
             return "redirect:/bills";
         }
@@ -261,7 +264,7 @@ public class BillController {
                                       @ModelAttribute("userFunctions") List<String> userFunctions,
                                       RedirectAttributes redirectAttributes){
 
-        if (!userFunctions.contains("HDH") || !userFunctions.contains("QLDH")) {
+        if (!authenticatedUserService.hasFunctions("HDH", "QLDH")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền huỷ đơn hàng !");
             return "redirect:/bills";
         }
